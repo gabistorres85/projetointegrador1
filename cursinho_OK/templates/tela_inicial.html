@@ -1,0 +1,86 @@
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tela Inicial</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: #5e1614;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .logo {
+      height: 100%;
+    }
+
+    .btn-sair {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      background-color: #a32422;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-sair:hover {
+      background-color: #791715;
+    }
+
+    main {
+      padding: 2rem;
+      margin-top: 80px; /* Altura do cabeçalho + padding */
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      margin: 1rem;
+      font-size: 1rem;
+      background-color: #7c1d1b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #5e1614;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://i.ibb.co/XZ9k2pGG/fdab45abb64cec37c5057c458f47027f.png" alt="Logo" class="logo">
+    <button class="btn-sair" onclick="location.href='/login'">Sair</button>
+  </header>
+
+  <main>
+    <h1>Bem-vindo!</h1>
+    <button class="btn" onclick="location.href='/cadastrar-aluno'">Cadastrar Aluno</button>
+    <button class="btn" onclick="location.href='/visualizar-alunos'">Visualizar Alunos</button>
+  </main>
+
+</body>
+</html>

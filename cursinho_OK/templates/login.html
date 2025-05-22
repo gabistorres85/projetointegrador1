@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Cursinho Construção</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: rgba(255, 255, 255, 0.815);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-top: 82px; /* Ajuste fino para coincidir com a outra página */
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: #5e1614;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 92px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .logo {
+      height: 60px;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      border: 4px solid #5e1614;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #5e1614;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #7c1d1b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #5e1614;
+    }
+
+    .btn-voltar {
+      margin-top: 1.5rem;
+      display: block;
+      padding: 0.8rem;
+      background-color: #5e1614;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+
+    .btn-voltar:hover {
+      background-color: #3e0f0e;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://i.ibb.co/XZ9k2pGG/fdab45abb64cec37c5057c458f47027f.png" alt="Logo" class="logo">
+  </header>
+
+  <div class="login-container">
+    <h2>Login - Cadastro de Alunos</h2>
+    <form action="/login" method="POST">
+      <input type="text" name="username" placeholder="Usuário" required>
+      <input type="password" name="password" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+    <a href="{{ url_for('home') }}" class="btn-voltar">Voltar</a>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Alunos Cadastrados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #5e1614;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5e1614;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+
+        .contador {
+            background-color: #7c1d1b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+
+        .filtros {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filtros input, .filtros select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-width: 150px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #7c1d1b;
+            color: white;
+            font-size: 16px;
+            position: sticky;
+            top: 80px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background-color: #5e1614;
+        }
+
+        th.sorted-asc::after {
+            content: " ↑";
+        }
+
+        th.sorted-desc::after {
+            content: " ↓";
+        }
+
+        td {
+            background-color: #fff;
+            position: relative;
+        }
+
+        /* Definição das larguras das colunas */
+        th:nth-child(1), td:nth-child(1) { width: 12%; } /* Nome */
+        th:nth-child(2), td:nth-child(2) { width: 7%; }  /* Data Nasc */
+        th:nth-child(3), td:nth-child(3) { width: 9%; }  /* CPF */
+        th:nth-child(4), td:nth-child(4) { width: 12%; } /* Email */
+        th:nth-child(5), td:nth-child(5) { width: 8%; }  /* Telefone */
+        th:nth-child(6), td:nth-child(6) { width: 7%; }  /* Matrícula */
+        th:nth-child(7), td:nth-child(7) { width: 7%; }  /* Conclusão */
+        th:nth-child(8), td:nth-child(8) { width: 15%; } /* Endereço */
+        th:nth-child(9), td:nth-child(9) { width: 10%; } /* Observações */
+        th:nth-child(10), td:nth-child(10) { width: 8%; } /* Curso */
+        th:nth-child(11), td:nth-child(11) { width: 5%; } /* Ações */
+
+        .btn-acao {
+            padding: 0.5rem 1rem;
+            margin: 0.2rem;
+            background-color: #7c1d1b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-acao:hover {
+            background-color: #5e1614;
+        }
+
+        .btn-voltar {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background-color: #5e1614;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .btn-voltar:hover {
+            background-color: #3e0f0e;
+        }
+
+        .sem-resultados {
+            display: none;
+            color: #7c1d1b;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        /* Tooltip para celulas com texto muito longo */
+        td:hover::after {
+            content: attr(data-full);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            z-index: 1000;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid #ddd;
+            white-space: normal;
+            width: 200px;
+            display: block;
+        }
+
+        /* Responsividade para telas menores */
+        @media screen and (max-width: 1200px) {
+            main {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 1100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://i.ibb.co/XZ9k2pGG/fdab45abb64cec37c5057c458f47027f.png" alt="Logo" class="logo">
+    </header>
+
+    <main>
+        <h1>Alunos Cadastrados</h1>
+        <div class="contador">Total de Alunos: <span id="total-alunos">{{ alunos|length }}</span></div>
+
+        <div class="filtros">
+            <input type="text" id="filtro-nome" placeholder="Filtrar por nome" oninput="filtrarTabela()">
+            <input type="text" id="filtro-cpf" placeholder="Filtrar por CPF" oninput="filtrarTabela()">
+            <select id="filtro-curso" onchange="filtrarTabela()">
+                <option value="">Todos os cursos</option>
+                {% for curso in alunos|map(attribute='curso_id')|unique %}
+                <option value="{{ curso }}">{{ curso }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="sem-resultados" id="sem-resultados">Nenhum aluno encontrado com os filtros aplicados.</div>
+
+        <table id="tabela-alunos">
+            <thead>
+                <tr>
+                    <th onclick="ordenarTabela(0)">Nome</th>
+                    <th onclick="ordenarTabela(1)" data-sort-type="date">Data Nasc.</th>
+                    <th onclick="ordenarTabela(2)">CPF</th>
+                    <th onclick="ordenarTabela(3)">Email</th>
+                    <th onclick="ordenarTabela(4)">Telefone</th>
+                    <th onclick="ordenarTabela(5)" data-sort-type="date">Matrícula</th>
+                    <th onclick="ordenarTabela(6)" data-sort-type="date">Conclusão</th>
+                    <th>Endereço</th>
+                    <th onclick="ordenarTabela(7)">Observações</th>
+                    <th onclick="ordenarTabela(8)">Curso</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aluno in alunos %}
+                <tr id="aluno-{{ loop.index }}" data-nome="{{ aluno.nome|lower }}" data-cpf="{{ aluno.cpf }}" data-curso="{{ aluno.curso_id }}">
+                    <td data-full="{{ aluno.nome }}">{{ aluno.nome }}</td>
+                    <td data-sort="{{ aluno.datanasc }}" data-full="{{ aluno.datanasc }}">{{ aluno.datanasc }}</td>
+                    <td data-full="{{ aluno.cpf }}">{{ aluno.cpf }}</td>
+                    <td data-full="{{ aluno.email }}">{{ aluno.email }}</td>
+                    <td data-full="{{ aluno.telefone }}">{{ aluno.telefone }}</td>
+                    <td data-sort="{{ aluno.datamatricula }}" data-full="{{ aluno.datamatricula }}">{{ aluno.datamatricula }}</td>
+                    <td data-sort="{{ aluno.dataconclusao }}" data-full="{{ aluno.dataconclusao }}">{{ aluno.dataconclusao }}</td>
+                    <td data-full="{{ aluno.endereco }}">{{ aluno.endereco }}</td>
+                    <td data-full="{{ aluno.observacoes }}">{{ aluno.observacoes }}</td>
+                    <td data-full="{{ aluno.curso_id }}">{{ aluno.curso_id }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}" class="btn-acao">✏️</a>
+                        <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn-acao">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('tela_inicial') }}" class="btn-voltar">Voltar para a Tela Inicial</a>
+    </main>
+
+    <script>
+        // Variáveis para controle da ordenação
+        let colunaOrdenada = -1;
+        let ordemAscendente = true;
+        
+        // Atualiza o contador de alunos na página
+        const atualizarContadorAlunos = () => {
+            const totalAlunosElem = document.getElementById('total-alunos');
+            const linhas = document.querySelectorAll('#tabela-alunos tbody tr:not([style*="display: none"])');
+            totalAlunosElem.textContent = linhas.length;
+        };
+        
+        // Função de filtro para a tabela
+        const filtrarTabela = () => {
+            const filtroNome = document.getElementById('filtro-nome').value.toLowerCase();
+            const filtroCpf = document.getElementById('filtro-cpf').value.toLowerCase();
+            const filtroCurso = document.getElementById('filtro-curso').value;
+            const linhas = document.querySelectorAll('#tabela-alunos tbody tr');
+            let visiveis = 0;
+        
+            linhas.forEach(linha => {
+                // Obtem dados dos atributos data-* definidos na tr
+                const nome = linha.dataset.nome;
+                const cpf = linha.dataset.cpf;
+                const curso = linha.dataset.curso;
+        
+                const correspondeNome = nome.includes(filtroNome);
+                const correspondeCpf = cpf.includes(filtroCpf);
+                const correspondeCurso = filtroCurso === '' || curso === filtroCurso;
+        
+                if (correspondeNome && correspondeCpf && correspondeCurso) {
+                    linha.style.display = '';
+                    visiveis++;
+                } else {
+                    linha.style.display = 'none';
+                }
+            });
+        
+            // Atualiza contador e mensagem de "sem resultados"
+            document.getElementById('total-alunos').textContent = visiveis;
+            document.getElementById('sem-resultados').style.display = visiveis === 0 ? 'block' : 'none';
+        };
+        
+        // Função para ordenação da tabela
+        const ordenarTabela = (coluna) => {
+            const tabela = document.getElementById('tabela-alunos');
+            const tbody = tabela.querySelector('tbody');
+            // Seleciona somente as linhas que estão visíveis
+            const linhas = Array.from(tbody.querySelectorAll('tr')).filter(l => l.style.display !== 'none');
+        
+            // Remove as classes de ordenação de todos os cabeçalhos
+            document.querySelectorAll('#tabela-alunos th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+        
+            // Inverte a ordem se a mesma coluna foi clicada novamente
+            if (colunaOrdenada === coluna) {
+                ordemAscendente = !ordemAscendente;
+            } else {
+                colunaOrdenada = coluna;
+                ordemAscendente = true;
+            }
+        
+            // Adiciona a classe no cabeçalho clicado
+            const cabecalho = tabela.tHead.rows[0].cells[coluna];
+            cabecalho.classList.add(ordemAscendente ? 'sorted-asc' : 'sorted-desc');
+        
+            // Ordena as linhas com base no conteúdo ou no atributo data-sort
+            linhas.sort((a, b) => {
+                let valorA = a.cells[coluna].getAttribute('data-sort') || a.cells[coluna].textContent.trim();
+                let valorB = b.cells[coluna].getAttribute('data-sort') || b.cells[coluna].textContent.trim();
+                const sortType = cabecalho.getAttribute('data-sort-type');
+        
+                if (sortType === 'date') {
+                    valorA = valorA ? new Date(valorA) : new Date(0);
+                    valorB = valorB ? new Date(valorB) : new Date(0);
+                }
+        
+                if (valorA < valorB) return ordemAscendente ? -1 : 1;
+                if (valorA > valorB) return ordemAscendente ? 1 : -1;
+                return 0;
+            });
+        
+            // Reordena as linhas visíveis na tabela
+            linhas.forEach(linha => tbody.appendChild(linha));
+        };
+        
+        // Configura os botões de exclusão para pedir confirmação
+        const configurarBotoesExcluir = () => {
+            const forms = document.querySelectorAll('form[action*="/excluir-aluno/"]');
+            
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const alunoId = this.getAttribute('action').split('/').pop();
+                    const confirmarExclusao = confirm(`Tem certeza que deseja excluir o aluno com ID ${alunoId}?`);
+                    
+                    if (confirmarExclusao) {
+                        this.submit();
+                    }
+                });
+            });
+        };
+        
+        // Inicializa todas as funcionalidades quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarContadorAlunos();
+            configurarBotoesExcluir();
+        });
+    </script>
+
+</body>
+</html>
