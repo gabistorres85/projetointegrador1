@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / compiled files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+.venv/
+env/
+venv/
+*/.venv/
+*/env/
+*/venv/
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+*.swp
+*.bak
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.*
+!.env.example # Keep example for reference
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files
+/uploads/
+/static/uploads/
+
+# Build artifacts
+dist/
+build/
