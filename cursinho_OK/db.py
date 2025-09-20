@@ -3,7 +3,7 @@ import hashlib
 import sqlite3
 from sqlite3.dbapi2 import Timestamp
 from sqlalchemy import ForeignKey, Table, create_engine, Column, Integer, String, Date, DateTime, Enum
-from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column
+from sqlalchemy.orm import declarative_base, relationship, Session, Mapped, mapped_column
 from sqlalchemy.sql import func
 
 # conecta ao banco de dados 'curso.db'
@@ -62,7 +62,7 @@ class Turma(Base):
     __tablename__ = 'turmas'
     id_Turma = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String, nullable=False, unique=True)
-    turmas = relationship("Cursos", secondary=curso_turma, back_populates="turmas") # Relação N:N
+    cursos = relationship("Curso", secondary=curso_turma, back_populates="turmas") # Relação N:N
     alunos = relationship("Aluno", backref="turma") # Relação 1:N
 
 
@@ -77,8 +77,8 @@ class Pcd(Base):
     __tablename__ = 'pcds'
     id_Pcd = Column(Integer, primary_key=True, autoincrement=True)
     descricao = Column(String, nullable=False, unique=True)
-    alunos = relationship("Aluno", backref="genero") #Relação N:1
-    professores = relationship("Professor", backref="genero") #Relação N:1
+    alunos = relationship("Aluno", backref="pcd") #Relação N:1
+    professores = relationship("Professor", backref="pcd") #Relação N:1
 
     
 
@@ -86,8 +86,8 @@ class Raca(Base):
     __tablename__ = 'racas'
     id_Raca = Column(Integer, primary_key=True, autoincrement=True)
     descricao = Column(String, nullable=False, unique=True)
-    alunos = relationship("Aluno", backref="genero") #Relação N:1
-    professores = relationship("Professor", backref="genero") #Relação N:1
+    alunos = relationship("Aluno", backref="raca") #Relação N:1
+    professores = relationship("Professor", backref="raca") #Relação N:1
 
 class Aluno(Base):
     __tablename__ = 'alunos'
@@ -117,6 +117,7 @@ class Curso(Base):
     area = Column(Enum(StatusArea), nullable=False)
     turno = Column(Enum(StatusTurno))
     professor = relationship("Professor", backref="cursos") # Relação N:1
+    turmas = relationship("Turma", secondary=curso_turma, back_populates="cursos") # Relação N:N
 
 class Professor(Base):
     __tablename__ = 'professores'
@@ -135,4 +136,30 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     print("Tabelas criadas com sucesso!")
 
+with Session(engine) as session:
+    # criando as tabelas de gênero, raça e pcd
+    branco = Raca(descricao="branco")
+    pardo = Raca(descricao="pardo")
+    preto = Raca(descricao="preto")
+    amarelo = Raca(descricao="amarelo")
+    indigena = Raca(descricao="indigena")
+    nao_declarado_raca = Raca(descricao="nao declarado")
+    homem_cis = Genero(descricao="homem-cis")
+    mulher_cis = Genero(descricao="mulher-cis")
+    homem_trans = Genero(descricao="homem-trans")
+    mulher_trans = Genero(descricao="mulher-trans")
+    nao_binario = Genero(descricao="não-binario")
+    nao_declarado_genero = Genero(descricao="nao declarado")
+    deficiencia_fisica = Pcd(descricao="deficiencia fisica")
+    deficiencia_auditiva = Pcd(descricao="deficiencia auditiva")
+    deficiencia_visual = Pcd(descricao="deficiencia visual")   
+    deficiencia_intelectual = Pcd(descricao="deficiencia inteclectual")
+    neurodivergencia = Pcd(descricao="neurodivergencia")
+    nao_declarado_pcd = Pcd(descricao="nao declarado")  
 
+session.add_all([branco, pardo, preto, amarelo, indigena, nao_declarado_raca,
+                 homem_cis, mulher_cis, homem_trans, mulher_trans, nao_binario, nao_declarado_genero,
+                 deficiencia_fisica, deficiencia_auditiva, neurodivergencia,nao_declarado_pcd])
+
+session.commit()
+print("Dados iniciais inseridos com sucesso!")
