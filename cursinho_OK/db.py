@@ -4,6 +4,7 @@ import sqlite3
 from sqlite3.dbapi2 import Timestamp
 from sqlalchemy import ForeignKey, create_engine, Column, Integer, String, Date, DateTime, Enum
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.sql import func
 
 # conecta ao banco de dados 'curso.db'
 # caso o banco não exista ele será criado
@@ -24,10 +25,12 @@ class Usuario(Base):
     login = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     senha_hash = Column(String, nullable=False)
-    criado_em = Column(Timestamp, default=DateTime.now)
+    criado_em = Column(DateTime, default=func.now())
+
 
     
     # Métodos para definir e verificar senha - usando hash
+
     def set_senha(self, senha: str):
         self.senha_hash = hash_senha(senha)
 
@@ -44,7 +47,7 @@ class Genero(Base):
     __tablename__ = 'generos'
     id_Genero = Column(Integer, primary_key=True, autoincrement=True)
     descricao = Column(String, nullable=False, unique=True)
-    alunos = relationship("Aluno", back_populates="genero", uselist=False) # Relação um-para-um
+    alunos = relationship("Aluno", back_populates="genero")
 
 class Pcd(Base):
     __tablename__ = 'pcds'
@@ -76,9 +79,10 @@ class Aluno(Base):
     endereco = Column(String)
     presenca = Column(Enum(StatusPresenca), default=StatusPresenca.falta)
     e_faltoso = Column(Integer, default=0)
-    genero = relationship("Genero", back_populates="alunos", uselist=False) # Relação um-para-um
+    genero = relationship("Genero", back_populates="alunos")    
     pcd = relationship("Pcd", back_populates="alunos", uselist=False) # Relação um-para-um
     raca = relationship("Raca", back_populates="alunos", uselist=False) # Relação um-para-um
+    cursos = relationship("Turma", secondary="curso_aluno", back_populates="alunos") # Relação muitos-para-muitos
 
 class Curso(Base):
     __tablename__ = 'cursos'
@@ -100,9 +104,10 @@ class Professor(Base):
     email = Column(String, nullable=False, unique=True)
     telefone = Column(String(11)) #11999999999
     cursos = relationship("Curso", back_populates="professor") # Relação um-para-muitos
-    genero = relationship("Genero", back_populates="alunos", uselist=False) # Relação um-para-um
-    pcd = relationship("Pcd", back_populates="alunos", uselist=False) # Relação um-para-um
-    raca = relationship("Raca", back_populates="alunos", uselist=False) # Relação um-para-um
+    professores = relationship("Professor", back_populates="genero") 
+    pcd = relationship("Pcd", back_populates="alunos", uselist=False) # Relação n:1
+    raca = relationship("Raca", back_populates="alunos", uselist=False) # Relação m-para-um
+    genero = relationship("Genero", back_populates="professores")
 
 class Turma(Base):
     __tablename__ = 'turmas'
@@ -113,7 +118,7 @@ class Turma(Base):
     curso_id = Column(Integer, ForeignKey('cursos.id_Curso'))
     id_Aluno = Column(Integer, ForeignKey('alunos.id_Aluno'))
     alunos = relationship("Aluno", secondary="curso_aluno", back_populates="cursos") #Relação muitos-para-muitos
-    curso = relationship("Curso", back_populates="turmas") # Relação um-para-muitos
+    curso = relationship("Curso", back_populates="turmas") # Relação um-para-muitosu
 
 class Matricula(Base):
     __tablename__ = 'curso_aluno'
@@ -123,6 +128,10 @@ class Matricula(Base):
     aluno = relationship("Aluno", back_populates="cursos", uselist=False) # Relação um-para-um
     turma = relationship("Turma", back_populates="alunos") # Relação um-para-um
     data_matricula = Column(DateTime)
+
+if __name__ == "__main__":
+    Base.metadata.create_all(engine)
+    print("Tabelas criadas com sucesso!")
     
 
 '''def criar_tabelas_todo():
