@@ -1,7 +1,5 @@
 import enum
 import hashlib
-import sqlite3
-from sqlite3.dbapi2 import Timestamp
 from sqlalchemy import ForeignKey, Table, create_engine, Column, Integer, String, Date, DateTime, Enum
 from sqlalchemy.orm import declarative_base, relationship, Session, Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -14,6 +12,7 @@ engine = create_engine("sqlite:///banco.db", echo=True)
 # Base para os modelos
 Base = declarative_base()
 
+# Tabela associativa para relação muitos-para-muitos entre Curso e Turma    
 curso_turma = Table(
     "curso_turma",
     Base.metadata,
@@ -27,7 +26,7 @@ def hash_senha(senha: str) -> str:
 class Usuario(Base):
     __tablename__ = 'usuarios'
     id_Usuario = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String, nullable=False)
+    usuario = Column(String, nullable=False)
     login = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     senha_hash = Column(String, nullable=False)
@@ -97,8 +96,8 @@ class Aluno(Base):
     id_Raca = Column(Integer, ForeignKey('racas.id_Raca'))
     id_Turma = Column(Integer, ForeignKey('turmas.id_Turma'))
     nome = Column(String, nullable=False)
-    datanasc = Column(String)
-    cpf = Column(String(11))
+    dt_nasc = Column(Date)
+    cpf = Column(String(11),unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     telefone = Column(String(11)) #11999999999
     endereco = Column(String)
@@ -136,30 +135,33 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     print("Tabelas criadas com sucesso!")
 
-with Session(engine) as session:
-    # criando as tabelas de gênero, raça e pcd
-    branco = Raca(descricao="branco")
-    pardo = Raca(descricao="pardo")
-    preto = Raca(descricao="preto")
-    amarelo = Raca(descricao="amarelo")
-    indigena = Raca(descricao="indigena")
-    nao_declarado_raca = Raca(descricao="nao declarado")
-    homem_cis = Genero(descricao="homem-cis")
-    mulher_cis = Genero(descricao="mulher-cis")
-    homem_trans = Genero(descricao="homem-trans")
-    mulher_trans = Genero(descricao="mulher-trans")
-    nao_binario = Genero(descricao="não-binario")
-    nao_declarado_genero = Genero(descricao="nao declarado")
-    deficiencia_fisica = Pcd(descricao="deficiencia fisica")
-    deficiencia_auditiva = Pcd(descricao="deficiencia auditiva")
-    deficiencia_visual = Pcd(descricao="deficiencia visual")   
-    deficiencia_intelectual = Pcd(descricao="deficiencia inteclectual")
-    neurodivergencia = Pcd(descricao="neurodivergencia")
-    nao_declarado_pcd = Pcd(descricao="nao declarado")  
+    with Session(engine) as session:
+        # criando as tabelas de gênero, raça e pcd
+        branco = Raca(descricao="branco")
+        pardo = Raca(descricao="pardo")
+        preto = Raca(descricao="preto")
+        amarelo = Raca(descricao="amarelo")
+        indigena = Raca(descricao="indigena")
+    
+        nao_declarado_raca = Raca(descricao="nao declarado")
+        homem_cis = Genero(descricao="homem-cis")
+        mulher_cis = Genero(descricao="mulher-cis")
+        homem_trans = Genero(descricao="homem-trans")
+        mulher_trans = Genero(descricao="mulher-trans")
+        nao_binario = Genero(descricao="não-binario")
+        nao_declarado_genero = Genero(descricao="nao declarado")
+        
+        deficiencia_fisica = Pcd(descricao="deficiencia fisica")
+        deficiencia_auditiva = Pcd(descricao="deficiencia auditiva")
+        deficiencia_visual = Pcd(descricao="deficiencia visual")   
+        deficiencia_intelectual = Pcd(descricao="deficiencia intelectual")
+        neurodivergencia = Pcd(descricao="neurodivergencia")
+        nao_declarado_pcd = Pcd(descricao="nao declarado")  
 
-session.add_all([branco, pardo, preto, amarelo, indigena, nao_declarado_raca,
-                 homem_cis, mulher_cis, homem_trans, mulher_trans, nao_binario, nao_declarado_genero,
-                 deficiencia_fisica, deficiencia_auditiva, neurodivergencia,nao_declarado_pcd])
+    session.add_all([branco, pardo, preto, amarelo, indigena, nao_declarado_raca,
+                    homem_cis, mulher_cis, homem_trans, mulher_trans, nao_binario, nao_declarado_genero,
+                    deficiencia_fisica, deficiencia_intelectual, deficiencia_auditiva, deficiencia_visual, nao_declarado_pcd])
 
-session.commit()
-print("Dados iniciais inseridos com sucesso!")
+    session.commit()
+    print("Dados iniciais inseridos com sucesso!")
+
