@@ -31,7 +31,8 @@ def to_int(value):
         return None
     try:
         return int(value)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as e:
+        print(e)
         return None
 # --------------------------
 # Página inicial (login)
@@ -82,10 +83,10 @@ def cadastrar_aluno():
     
     #Tratamento dos dados
     for k in ['id_Genero','id_Pcd','id_Raca']:
-        data[k] = to_int(k)
+        data[k] = to_int(data.get(k))
 
     for k in ['dt_nasc','dt_matricula','dt_conclusao']:
-      data[k] = to_date(k)
+      data[k] = to_date(data.get(k))
 
     # Campos opcionais
     novo_aluno = db.Aluno(**data)
